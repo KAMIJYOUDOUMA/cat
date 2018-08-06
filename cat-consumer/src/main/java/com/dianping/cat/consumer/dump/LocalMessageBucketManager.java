@@ -1,7 +1,5 @@
 package com.dianping.cat.consumer.dump;
 
-import io.netty.buffer.ByteBuf;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,8 +27,8 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.hadoop.hdfs.HdfsUploader;
 import com.dianping.cat.message.Message;
-import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.MessageProducer;
+import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.internal.MessageId;
 import com.dianping.cat.message.spi.MessageTree;
