@@ -1,6 +1,7 @@
 package com.dianping.cat.analysis;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.unidal.helper.Threads;
 import org.unidal.lookup.ContainerHolder;
@@ -120,4 +121,21 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 		Threads.forGroup("cat").start(m_periodManager);
 	}
 
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		RealtimeConsumer that = (RealtimeConsumer) o;
+		return Objects.equals(m_analyzerManager, that.m_analyzerManager) &&
+				Objects.equals(m_serverStateManager, that.m_serverStateManager) &&
+				Objects.equals(m_blackListManager, that.m_blackListManager) &&
+				Objects.equals(m_periodManager, that.m_periodManager) &&
+				Objects.equals(m_logger, that.m_logger);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(m_analyzerManager, m_serverStateManager, m_blackListManager, m_periodManager, m_logger);
+	}
 }

@@ -8,26 +8,29 @@ import org.unidal.lookup.logging.Logger;
 import com.dianping.cat.message.spi.MessageTree;
 
 public class DefaultMessageHandler extends ContainerHolder implements MessageHandler, LogEnabled {
-	@Inject
-	private MessageConsumer m_consumer;
 
-	private Logger m_logger;
+    private final static RealtimeConsumer realtimeConsumer = new RealtimeConsumer();
 
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
+    @Inject
+    private MessageConsumer m_consumer;
 
-	@Override
-	public void handle(MessageTree tree) {
-		if (m_consumer == null) {
-			m_consumer = lookup(MessageConsumer.class);
-		}
+    private Logger m_logger;
 
-		try {
-			m_consumer.consume(tree);
-		} catch (Throwable e) {
-			m_logger.error("Error when consuming message in " + m_consumer + "! tree: " + tree, e);
-		}
-	}
+    @Override
+    public void enableLogging(Logger logger) {
+        m_logger = logger;
+    }
+
+    @Override
+    public void handle(MessageTree tree) {
+        if (m_consumer == null || m_consumer.equals(realtimeConsumer)) {
+            m_consumer = lookup(MessageConsumer.class);
+        }
+
+        try {
+            m_consumer.consume(tree);
+        } catch (Throwable e) {
+            m_logger.error("Error when consuming message in " + m_consumer + "! tree: " + tree, e);
+        }
+    }
 }

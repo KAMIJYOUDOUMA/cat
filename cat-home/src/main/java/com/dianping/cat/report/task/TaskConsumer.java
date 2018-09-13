@@ -58,6 +58,7 @@ public abstract class TaskConsumer implements org.unidal.helper.Threads.Task {
 		String localIp = getLoaclIp();
 		while (running) {
 			try {
+				// 当前分钟数是否大于15
 				if (checkTime()) {
 					Task task = findDoingTask(localIp);
 					if (task == null) {

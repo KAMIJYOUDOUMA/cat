@@ -144,7 +144,7 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 		}
 		ctx = m_context.get();
 
-		return ctx.m_tree;
+		return ctx.getM_tree();
 	}
 
 	@Override
@@ -269,26 +269,26 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 		private Set<Throwable> m_knownExceptions;
 
 		public Context(String domain, String hostName, String ipAddress) {
-			m_tree = new DefaultMessageTree();
+			setM_tree(new DefaultMessageTree());
 			m_stack = new Stack<Transaction>();
 
 			Thread thread = Thread.currentThread();
 			String groupName = thread.getThreadGroup().getName();
 
-			m_tree.setThreadGroupName(groupName);
-			m_tree.setThreadId(String.valueOf(thread.getId()));
-			m_tree.setThreadName(thread.getName());
+			getM_tree().setThreadGroupName(groupName);
+			getM_tree().setThreadId(String.valueOf(thread.getId()));
+			getM_tree().setThreadName(thread.getName());
 
-			m_tree.setDomain(domain);
-			m_tree.setHostName(hostName);
-			m_tree.setIpAddress(ipAddress);
+			getM_tree().setDomain(domain);
+			getM_tree().setHostName(hostName);
+			getM_tree().setIpAddress(ipAddress);
 			m_length = 1;
 			m_knownExceptions = new HashSet<Throwable>();
 		}
 
 		public void add(Message message) {
 			if (m_stack.isEmpty()) {
-				MessageTree tree = m_tree.copy();
+				MessageTree tree = getM_tree().copy();
 
 				tree.setMessage(message);
 				flush(tree);
@@ -300,7 +300,7 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 		}
 
 		private void addTransactionChild(Message message, Transaction transaction) {
-			long treePeriod = trimToHour(m_tree.getMessage().getTimestamp());
+			long treePeriod = trimToHour(getM_tree().getMessage().getTimestamp());
 			long messagePeriod = trimToHour(message.getTimestamp() - 10 * 1000L); // 10 seconds extra time allowed
 
 			if (treePeriod < messagePeriod || m_length >= m_configManager.getMaxMessageLength()) {
@@ -344,10 +344,10 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 				}
 
 				if (m_stack.isEmpty()) {
-					MessageTree tree = m_tree.copy();
+					MessageTree tree = getM_tree().copy();
 
-					m_tree.setMessageId(null);
-					m_tree.setMessage(null);
+					getM_tree().setMessageId(null);
+					getM_tree().setMessage(null);
 
 					if (m_totalDurationInMicros > 0) {
 						adjustForTruncatedTransaction((Transaction) tree.getMessage());
@@ -399,7 +399,7 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 				Transaction parent = m_stack.peek();
 				addTransactionChild(transaction, parent);
 			} else {
-				m_tree.setMessage(transaction);
+				getM_tree().setMessage(transaction);
 			}
 
 			if (!forked) {
@@ -409,6 +409,14 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 
 		private long trimToHour(long timestamp) {
 			return timestamp - timestamp % (3600 * 1000L);
+		}
+
+		public MessageTree getM_tree() {
+			return m_tree;
+		}
+
+		public void setM_tree(MessageTree m_tree) {
+			this.m_tree = m_tree;
 		}
 	}
 
@@ -453,7 +461,7 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 		}
 
 		public void truncateAndFlush(Context ctx, long timestamp) {
-			MessageTree tree = ctx.m_tree;
+			MessageTree tree = ctx.getM_tree();
 			Stack<Transaction> stack = ctx.m_stack;
 			Message message = tree.getMessage();
 
@@ -496,9 +504,9 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 
 				t.setMessage(target);
 
-				ctx.m_tree.setMessageId(childId);
-				ctx.m_tree.setParentMessageId(id);
-				ctx.m_tree.setRootMessageId(rootId != null ? rootId : id);
+				ctx.getM_tree().setMessageId(childId);
+				ctx.getM_tree().setParentMessageId(id);
+				ctx.getM_tree().setRootMessageId(rootId != null ? rootId : id);
 
 				ctx.m_length = stack.size();
 				ctx.m_totalDurationInMicros = ctx.m_totalDurationInMicros + target.getDurationInMicros();
